@@ -1,3 +1,6 @@
 <?php
-echo("Welcome to Logout Page");
+session_start();
+session_destroy();
+header("Location:index.php");
+return;
 ?>
