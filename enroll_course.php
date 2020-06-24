@@ -25,7 +25,7 @@ if(isset($_POST['enroll'])){
         ':b' => $student_id
     ));
     $_SESSION['success'] = "<ul><li class='alert-success'>Enrolled Successfully.</li></ul>";
-            header("Location:../student_my_courses.php/?course_id=".$course_id);
+            header("Location:/Elearn/student_my_courses.php/?student_id=".$student_id);
             return;} 
 }
 
