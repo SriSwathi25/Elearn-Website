@@ -3,6 +3,7 @@ session_start();
 include "bootstrap.php";
 include("banner.html");
 include("_navbar.php");
+include("profile_pic.php");
 echo("<style>");
 include 'mystyle.css';
 echo("</style>");

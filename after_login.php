@@ -26,7 +26,7 @@ echo("</style>");
         echo('<ul class="nav navbar-nav navbar-right">');
         echo('<li><a href="/Elearn/student_my_courses.php/?student_id='.$student_id.'">My Courses</a></li>');
         echo('<li><a class="navbar-brand">'.$_SESSION['username'].'</a></li>');
-        echo('<li><a href="logout.php">Logout</a></li>');
+        echo('<li><a href="/Elearn/logout.php">Logout</a></li>');
 
         echo('</ul>');
     }
@@ -45,7 +45,7 @@ echo("</style>");
         echo('</ul>');
         echo('<ul class="nav navbar-nav navbar-right">');
         echo('<li><a class="navbar-brand">'.$_SESSION['username'].'</a></li>');
-        echo('<li><a href="logout.php">Logout</a></li>');
+        echo('<li><a href="/Elearn/logout.php">Logout</a></li>');
         echo('</ul>');
     }
     ?>
