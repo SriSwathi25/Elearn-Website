@@ -2,9 +2,16 @@
 session_start();
 require_once "pdo.php";
 require_once "bootstrap.php";
+echo("<style>");
+include 'mystyle.css';
+echo("</style>");
 include("banner.html");
 include("_navbar.php");
 echo("<h1><em><center>Login here...</em></center></h1>");
+if(isset($_SESSION['user'])){
+    header("Location:index.php");
+    return;
+}
 if(isset($_POST['email']) && isset($_POST['pass'])){
     unset($_SESSION['user']);
     $pass = hash('md5',$_POST['pass']);

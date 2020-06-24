@@ -2,30 +2,38 @@
 session_start();
 require_once "pdo.php";
 require_once "bootstrap.php";
-include("banner.html");
+echo("<style>");
+include 'mystyle.css';
+echo("</style>");
+#include("banner.html");
 include("_navbar.php");
 #echo("BOOOM");
 #var_dump($_POST);
-if(isset($_POST['module_number']) && isset($_POST['module_title']) && (isset($_FILES["module_video"]["tmp_name"]) || is_uploaded_file($_FILES["module_video"]["tmp_name"])) &&  isset($_POST['module_notes'])  ){
-    echo("HIII");
-    /*if(strlen($_POST['module_number'])<1 || strlen($_POST['module_title'])<1 || strlen($_POST['module_notes'])<1 || !( isset($_FILES["module_video"]["tmp_name"]) || is_uploaded_file($_FILES["module_video"]["tmp_name"]) ) )
-    {
-        $_SESSION['error'] =  "<ul><li class='alert-danger text-center'>Add all required fields to upload Module successfully</li></ul>";
-        header("Location:addModule.php");
+if(isset($_GET['course_id'])){
+    if(strlen($_GET['course_id']) <1){
+        echo("INVALID REQUEST");
         return;
-
     }
-    */
-    #echo("I am outt");
+    $course_id = $_GET['course_id'];
+    $sql = "SELECT * from course where course_id=:id";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute(array(
+        ':id' => $course_id
+    ));
+    $row = $stmt->fetch();
+    $course_name = $row['course_name'];
+    echo('<div class="container-fluid" style="border-radius:0.5em;;width:60%;background-color:#f7ede2;">');
+    echo('<h2 style="display:inline;">Add Modules for </h2><h1 style="display:inline;">'.htmlentities($course_name) .'</h1>
+    <p>Module Resources are optional. Provide if necessary.</p>');
+if(isset($_POST['module_number']) && isset($_POST['module_title']) && (isset($_FILES["module_video"]["tmp_name"]) || is_uploaded_file($_FILES["module_video"]["tmp_name"])) &&  isset($_POST['module_notes'])  ){
+    
     if(isset($_FILES["module_video"]["tmp_name"]) || is_uploaded_file($_FILES["module_video"]["tmp_name"]) ){
         $target_dir = "videos/";
-        #$target_file = $target_dir . $_POST['newname'];
- 
-        // Select file type
+        
         $video = $_FILES["module_video"]["name"];
         $FileType = strtolower(pathinfo($_FILES["module_video"]["name"],PATHINFO_EXTENSION));
 
-        $target_file = $target_dir . $_SESSION['course_name'] ."_". $_POST['module_number'] .".". $FileType;
+        $target_file = $target_dir . $course_name."_". $_POST['module_number'] .".". $FileType;
         $module_video = $target_file;
         #echo($target_file);
              if(move_uploaded_file($_FILES["module_video"]["tmp_name"], $target_file)){
@@ -42,7 +50,7 @@ if(isset($_FILES["module_resources"]["tmp_name"]) || is_uploaded_file($_FILES["m
     $resource = $_FILES["module_resources"]["name"];
     $FileType = strtolower(pathinfo($_FILES["module_resources"]["name"],PATHINFO_EXTENSION));
 
-    $target_file = $target_dir . $_session['course_name'] ."_". $_POST['module_number'] .".". $FileType;
+    $target_file = $target_dir . $course_name ."_". $_POST['module_number'] .".". $FileType;
     $module_resources = $target_file;
     
 
@@ -50,46 +58,17 @@ if(isset($_FILES["module_resources"]["tmp_name"]) || is_uploaded_file($_FILES["m
             echo($target_file);
              $module_resources = $target_file;
             }
+
 }
 else{
     $module_resources = NULL;
 }
-    $sql = "SELECT * from course where course_name=:name";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute(array(
-        ':name' => $_SESSION['course_name']
-    ));
-    if($stmt->rowCount() == 0){
-
-    $sql = "SELECT * from teacher where teacher_username=:name";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute(array(
-        ':name' => $_SESSION['username']
-    ));
-    $ans = $stmt->fetch();
-    $teacher_id = $ans['teacher_id'];
-
+  
     
-    $course_name = $_SESSION['course_name'];
 
-    $sql2 = "INSERT into course(course_name,teacher_id) values(:a,:b)";
-    $stmt2 = $pdo->prepare($sql2);
-    $stmt2->execute(array(
-        ':a' => $course_name,
-        ':b' => $teacher_id
-    ));
-    }
-
-    $sql = "SELECT * from course where course_name=:name";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute(array(
-        ':name' => $_SESSION['course_name']
-    ));
-    $row = $stmt->fetch();
-
-    $course_id = $row['course_id'];
+    $course_id = $_GET['course_id'];
         
-    $sql = "INSERT into module (course_id,module_number, module_video,module_content,module_resources) values(:a,:b,:c,:d,:e)";
+    $sql = "INSERT into module (course_id,module_number, module_title, module_video,module_content,module_resources) values(:a,:b,:f, :c,:d,:e)";
     $stmt = $pdo->prepare($sql);
     $stmt->execute(
         array(
@@ -97,14 +76,15 @@ else{
             ':b' => $_POST['module_number'],
             ':c' => $module_video,
             ':d' => $_POST['module_notes'],
-            ':e' => $module_resources
+            ':e' => $module_resources,
+            ':f' => $_POST['module_title']
             
             ));
             $_SESSION['success'] = "<ul><li class='alert-success'>Module Uploaded Successfully.</li></ul>";
-            header("Location:addModule.php");
+            header("Location:/Elearn/course.php/?course_id=".$course_id);
             return;
 
-
+        }
 }
 ?>
 <!DOCTYPE html>
@@ -117,12 +97,6 @@ else{
 </head>
 <body>
 <?php
-if(!isset($_SESSION['course_name'])){
-    $_SESSION['error'] = "<ul><li class='alert-danger text-center'>Go to Add Courses, Enter Course Name to proceed further</li></ul>";
-    echo("<h1>".$_SESSION['error']."</h1>");
-    return;
-     
-}
     if(isset($_SESSION['error'])){
         echo $_SESSION['error'];
         unset($_SESSION['error']);
@@ -132,9 +106,8 @@ if(!isset($_SESSION['course_name'])){
         unset($_SESSION['success']);
     }
     ?>
-    <div class="container-fluid" style="border-radius:0.5em;;width:60%;background-color:#f7ede2;">
-    <h2 style="display:inline;">Add Modules for </h2><h1 style="display:inline;"> <?= htmlentities($_SESSION['course_name']) ?></h1>
-    <p>Module Resources are optional. Provide if necessary.</p>
+    
+    
     <br>
     <br>
     <form method="post" enctype="multipart/form-data">

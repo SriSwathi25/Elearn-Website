@@ -2,8 +2,50 @@
 session_start();
 require_once "pdo.php";
 require_once "bootstrap.php";
-include("banner.html");
+echo("<style>");
+include 'mystyle.css';
+echo("</style>");
+
+#include("banner.html");
 include("_navbar.php");
+    if(isset($_POST['course_name'])){
+        if(strlen($_POST['course_name'])>1){
+            $sql = "SELECT * from teacher where teacher_username=:name";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute(array(
+                ':name' => $_SESSION['username']
+            ));
+            $ans = $stmt->fetch();
+            $teacher_id = $ans['teacher_id'];     
+            $course_name = $_POST['course_name'];
+        
+            $sql2 = "INSERT into course(course_name,teacher_id) values(:a,:b)";
+            $stmt2 = $pdo->prepare($sql2);
+            $stmt2->execute(array(
+                ':a' => $course_name,
+                ':b' => $teacher_id
+            ));
+
+            $sql3 = "Select * from course where course_name=:a and teacher_id=:b";
+            $stmt3 = $pdo->prepare($sql3);
+            $stmt3->execute(array(
+                ':a' => $course_name,
+                ':b' => $teacher_id
+            ));
+            $c = $stmt3->fetch();
+
+
+            $_SESSION['success'] = "<ul><li class='alert-success'>".$course_name." added successfully !</li></ul>";
+            header("Location:addModule.php/?course_id=".$c['course_id']);
+        return;
+
+        }
+        else{
+            $_SESSION['error'] = "<ul><li class='alert-warning'>Enter Course Name to proceed further</li></ul>";
+            header("Location:addCourse.php");
+        return;
+        }
+    }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -35,22 +77,7 @@ include("_navbar.php");
              <br>
     </form>
     </div>
-    <?php
-    if(isset($_POST['course_name'])){
-        if(strlen($_POST['course_name'])>1){
-        $_SESSION['course_name'] = $_POST['course_name'];
-        header("Location:addModule.php");
-        return;
-        }
-        else{
-            $_SESSION['error'] = "<ul><li class='alert-warning'>Enter Course Name to proceed further</li></ul>";
-            header("Location:addCourse.php");
-        return;
-        }
-    }
-
-
-?>
+    
     
 </body>
 </html>

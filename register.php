@@ -2,6 +2,9 @@
 session_start();
 require_once "pdo.php";
 require_once "bootstrap.php";
+echo("<style>");
+include 'mystyle.css';
+echo("</style>");
 include("banner.html");
 include("_navbar.php");
 echo("<h1><em><center>Register here...</em></center></h1>");
