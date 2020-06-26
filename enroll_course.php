@@ -2,6 +2,7 @@
 session_start();
 require_once "pdo.php";
 require_once "bootstrap.php";
+require_once './vendor/autoload.php';
 echo("<style>");
 include 'mystyle.css';
 echo("</style>");
@@ -17,6 +18,21 @@ if(isset($_GET['course_id']) && isset($_GET['student_id'])){
 $course_id = $_GET['course_id'];
 $student_id = $_GET['student_id'];
 
+$boo = "SELECT * from student where student_id=:a";
+$p = $pdo->prepare($boo);
+$p->execute(array(
+    ':a' => $student_id
+));
+$student = $p->fetch();
+
+$boo = "SELECT * from course where course_id=:a";
+$p = $pdo->prepare($boo);
+$p->execute(array(
+    ':a' => $course_id
+));
+$cou = $p->fetch();
+
+
 if(isset($_POST['enroll'])){
     $boo = "INSERT into enrollment(course_id,student_id) values(:a,:b)";
     $boww = $pdo->prepare($boo);
@@ -24,6 +40,39 @@ if(isset($_POST['enroll'])){
         ':a' => $course_id,
         ':b' => $student_id
     ));
+    //Sending enrolled message
+    $transport = (new Swift_SmtpTransport('smtp.gmail.com', 465, 'ssl'))
+  ->setUsername('25nsriswathi@gmail.com')
+  ->setPassword('Tatti2502')
+;
+
+// Create the Mailer using your created Transport
+$mailer = new Swift_Mailer($transport);
+
+// Create a message
+$attachment = Swift_Attachment::fromPath('logo.jpg')->setDisposition('inline');
+$attachment->getHeaders()->addTextHeader('Content-ID', '<ABC123>');
+$attachment->getHeaders()->addTextHeader('X-Attachment-Id', 'ABC123');
+
+
+$message = (new Swift_Message('Course Enrollment'))
+  ->setFrom(['25nsriswathi@gmail.com' => 'Elearn-Come.Learn.Grow.'])
+  ->setTo([$student['student_email'] => $student['student_username']])
+  ->setBody('Congratulations '.$student['student_name'].'!! <br> You have successfully enrolled for the course
+  <h1>'.$cou['course_name'].'</h1> 
+  '.$img.'
+  <h2><em>All the best</em></h2><br><br><div><h3>-Team Elearn</h3><h4>Come. Learn. Grow.</h4></div>
+  
+  ')
+  ;
+  $cid = $message->embed($attachment);
+$img = '<img src="cid:ABC123"/>';
+  $message->setContentType("text/html");
+
+// Send the message
+$result = $mailer->send($message); 
+echo("<script>alert('Enrolled Successfully');</script>"); 
+
     $_SESSION['success'] = "<ul><li class='alert-success'>Enrolled Successfully.</li></ul>";
             header("Location:/Elearn/student_my_courses.php/?student_id=".$student_id);
             return;} 

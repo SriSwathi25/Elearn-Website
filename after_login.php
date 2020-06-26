@@ -5,6 +5,7 @@ echo("<style>");
 include 'mystyle.css';
 echo("</style>");
 ?>
+
 <nav class="navbar navbar-inverse">
   <div class="container-fluid">
     <div class="navbar-header">
